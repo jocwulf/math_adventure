@@ -20,6 +20,12 @@ openai.api_key = os.getenv("OPENAI_KEY")
 # Load image
 image = Image.open('children.png')
 
+def reset_state():
+    """Resets the session state."""
+    keys = list(st.session_state.keys())
+    for key in keys:
+        del st.session_state[key]
+
 def generate_riddle(calculation_type, riddle_max):
     """Generates a riddle and returns the question and answer."""
     num1 = np.random.randint(RIDDLE_MIN, riddle_max)
@@ -93,7 +99,6 @@ def generate_challenge():
     status_message.empty()  # remove the status message
     return st.session_state['story'][0] # return first episode
 
-
 def on_input_change():
     """Handles child input and checks if it is correct."""
     user_input = st.session_state["user_input"+str(st.session_state['current_task'])] # get user input
@@ -109,46 +114,56 @@ def on_input_change():
     else: # user input is wrong
         st.session_state.generated.append("Not quite right. Try again! " + st.session_state.question[st.session_state['current_task'] ])  # append wrong message to output
 
+if 'end_story' not in st.session_state:
+    st.session_state['end_story'] = False
+
 if 'input_done' not in st.session_state:
     st.session_state['input_done'] = False
 
 st.title("༼ ͡ಠ ͜ʖ ͡ಠ ༽ Your Math Adventure")
 st.image(image, use_column_width=True)
 
-if st.session_state['input_done'] == False:
-    with st.sidebar:
-        st.selectbox("How many math problems would you like to solve?", [3, 5, 7, 10], key="riddle_count", index=0)
-        st.multiselect("Choose the calculation type", ["Addition", "Subtraction", "Multiplication", "Division"], key="calculation_type", default=["Addition", "Subtraction", "Multiplication", "Division"])
-        st.selectbox("Choose the number range", ["1 digit (1-9)", "2 digits (1-99)"], key="number_range", index=0)
-        st.selectbox("Which story do you want to hear?", STORY_CHARACTERS, key="person", index=0)
-        st.selectbox("Choose a topic", STORY_TOPICS, key="topic", index=0)
-        if st.button("Start the story", key="start_btn"):
-            st.session_state['input_done'] = True
-            if st.session_state['number_range'] == "1 digit (1-9)":
-                st.session_state['riddle_max'] = 9
-            else:
-                st.session_state['riddle_max'] = 99
+if st.session_state['end_story']: # story ended
+    st.write("The story has ended.")
+    if st.button("Start a new story"):
+        reset_state()
+else: # story not ended
+    if st.session_state['input_done'] == False:
+        with st.sidebar:
+            st.selectbox("How many math problems would you like to solve?", [3, 5, 7, 10], key="riddle_count", index=0)
+            st.multiselect("Choose the calculation type", ["Addition", "Subtraction", "Multiplication", "Division"], key="calculation_type", default=["Addition", "Subtraction", "Multiplication", "Division"])
+            st.selectbox("Choose the number range", ["1 digit (1-9)", "2 digits (1-99)"], key="number_range", index=0)
+            st.selectbox("Which story do you want to hear?", STORY_CHARACTERS, key="person", index=0)
+            st.selectbox("Choose a topic", STORY_TOPICS, key="topic", index=0)
+            if st.button("Start the story", key="start_btn"):
+                st.session_state['input_done'] = True
+                if st.session_state['number_range'] == "1 digit (1-9)":
+                    st.session_state['riddle_max'] = 9
+                else:
+                    st.session_state['riddle_max'] = 99
 
-if st.session_state['input_done']:
-    if 'past' not in st.session_state:
-        st.session_state['past']=['Here your answers are shown.']
-    if 'generated' not in st.session_state:
-        st.session_state['generated'] = [generate_challenge()]
-    if 'finished' not in st.session_state:
-        st.session_state['finished'] = False
-    chat_placeholder = st.empty()
-    with chat_placeholder.container():    
-        # st.write(st.session_state.story) # for debugging
-        for i in range(len(st.session_state['generated'])):  
-                           
-            message(str(st.session_state['past'][i]), is_user=True, key=str(i) + '_user')
-            message(
-                st.session_state['generated'][i],
-                key=str(i)
-            )
+    if st.session_state['input_done']:
+        if 'past' not in st.session_state:
+            st.session_state['past']=['Here your answers are shown.']
+        if 'generated' not in st.session_state:
+            st.session_state['generated'] = [generate_challenge()]
+        if 'finished' not in st.session_state:
+            st.session_state['finished'] = False
+        chat_placeholder = st.empty()
+        with chat_placeholder.container():    
+            # st.write(st.session_state.story) # for debugging
+            for i in range(len(st.session_state['generated'])):  
+                            
+                message(str(st.session_state['past'][i]), is_user=True, key=str(i) + '_user')
+                message(
+                    st.session_state['generated'][i],
+                    key=str(i)
+                )
 
-    if not st.session_state['finished']:
-        with st.container():
-            st.number_input("Your solution:", min_value=-1, max_value=100, 
-                            value=-1, step=1, on_change=on_input_change, 
-                            key="user_input"+str(st.session_state['current_task']))
+        if not st.session_state['finished']:
+            with st.container():
+                st.number_input("Your solution:", min_value=-1, max_value=100, 
+                                value=-1, step=1, on_change=on_input_change, 
+                                key="user_input"+str(st.session_state['current_task']))
+        if st.button("End the story", key="end_btn"):
+            st.session_state['end_story'] = True
