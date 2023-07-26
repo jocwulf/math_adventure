@@ -10,7 +10,7 @@ This Python script uses Streamlit, a popular open-source app framework, and Open
 
 2. **Riddle Generation**: The script generates a series of math riddles for the child to solve. The number of riddles is determined by the user at the start of the session. The user can choose the number of math problems, the calculation type (addition, subtraction, multiplication, division), and the number range (1 digit or 2 digits).
 
-3. **User Interaction**: The script allows the child to input their answers to the math problems. If the answer is correct, the next episode of the story is generated. If the answer is incorrect, the child is prompted to try again.
+3. **User Interaction**: The script allows the child to input their answers to the math problems. If the answer is correct, the next episode of the story is generated. If the answer is incorrect, the child is prompted to try again. (Note: In this example I used GPT 3.5. GPT 4 is much better in producing correct math problems.)
 
 ![Alt text](./images/story.png?raw=true "Title")   
 
