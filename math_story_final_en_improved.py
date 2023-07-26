@@ -4,15 +4,20 @@ import streamlit as st
 import openai
 from dotenv import load_dotenv
 from streamlit_chat import message
+from PIL import Image
 
 # Constants
-SENTENCES_PER_EPISODE = 6
+SENTENCES_PER_EPISODE = 5
 RIDDLE_MIN = 2
-RIDDLE_MAX = 20
+RIDDLE_MAX = 10
+MODEL = "gpt-3.5-turbo-0613"
 
 # Load OpenAI key from .env file
 load_dotenv(".env")
 openai.api_key = os.getenv("OPENAI_KEY")
+
+# Load image
+image = Image.open('children.png')
 
 def generate_riddle():
     """Generates a multiplication riddle and returns the question and answer."""
@@ -25,7 +30,7 @@ def generate_riddle():
 def generate_story(messages):
     """Generates a story episode using the OpenAI API and returns the story."""
     story = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo-0613",
+        model=MODEL,
         messages=messages,
         temperature=0.5,
     )
@@ -40,11 +45,18 @@ def generate_challenge():
     messages = [] # list of messages for openai requests
 
     # system message for openai requests
-    sys_message = """Tell a seven-year-old child a continuation story. Each episode consists of exactly {0} sentences. The story is about the school day of {1}. An episode of the story consists of exactly {0} sentences and no more. Start directly with the narration. End each episode with a math problem, which is always posed by [role: user] beforehand. Integrate the math problem into the narration of the episode. Make sure the math problem is correctly formulated. Do not give the solution. By solving this problem, the child can help {1}. Continue in the new episode already told episodes and pose a new math problem. PLEASE NOTE: Do not give the solution to the math problem. Use only {0} sentences. End the end with the math problem.""".format(SENTENCES_PER_EPISODE, st.session_state['person'])
+    sys_message = """Tell a seven-year-old child a continuation story about {2}. Each episode consists of exactly {0} sentences. The story is about the day of {1}. An episode of the story consists of exactly {0} sentences and no more. Start directly with the narration. End each episode with a math problem, which is always posed by [role: user] beforehand. Integrate the math problem into the narration of the episode. Make sure the math problem is correctly formulated. Do not give the solution. By solving this problem, the child can help {1}. Continue in the new episode already told episodes and pose a new math problem. PLEASE NOTE: Do not give the solution to the math problem. Use only {0} sentences. End the end with the math problem.""".format(SENTENCES_PER_EPISODE, st.session_state['person'], st.session_state['topic'])
     
     messages.append({"role": "system", "content": sys_message})
 
-    for _ in range(st.session_state['riddle_count']): # generate riddles and stories
+    # Create a progress bar
+    progress_bar = st.progress(0)
+    status_message = st.empty()
+    status_message.text("I am generating your story...")
+    for i in range(st.session_state['riddle_count']): # generate riddles and stories
+        # Update the progress bar
+        progress_bar.progress((i + 1) / st.session_state['riddle_count'])
+
         # generate riddle
         question, answer = generate_riddle()
         messages.append({"role": "user", "content": question})
@@ -65,14 +77,15 @@ def generate_challenge():
     st.session_state.story.append(story)   
     
     st.session_state['current_task'] = 0 # keeps track of the current episode
+    status_message.empty()  # remove the status message
     return st.session_state['story'][0] # return first episode
+
 
 def on_input_change():
     """Handles child input and checks if it is correct."""
     user_input = st.session_state["user_input"+str(st.session_state['current_task'])] # get user input
     st.session_state['past'].append(user_input) # save user input to session state
     if user_input == st.session_state.right_answer[st.session_state['current_task']]: # user input is correct
-        st.success("Correct answer! Here's the next part of the story.")
         #check if all tasks done
         if st.session_state['current_task'] == st.session_state['num_riddles']-1: # all tasks are done
             st.session_state['generated'].append(st.session_state['story'][st.session_state['current_task']+1]) # generate final episode
@@ -87,13 +100,6 @@ if 'input_done' not in st.session_state:
     st.session_state['input_done'] = False
 
 st.title("༼ ͡ಠ ͜ʖ ͡ಠ ༽ Your Math Adventure")
-
-if st.session_state['input_done'] == False:
-    with st.sidebar:
-        st.selectbox("How many math problems would you like to solve?", [3, 5, 7, 10], key="riddle_count", index=0)
-        st.selectbox("Which story do you want to hear?", ["The Bullerby Children", "Pippi Longstocking", "Emil of Lönneberga"], key="person", index=0)
-        if st.button("Start the story", key="start_btn"):
-            st.session_state['input_done'] = True
 
 if st.session_state['input_done']:
     if 'past' not in st.session_state:
@@ -113,10 +119,17 @@ if st.session_state['input_done']:
                 key=str(i)
             )
 
+    if not st.session_state['finished']:
+        with st.container():
+            st.number_input("Your solution:", min_value=0, max_value=100, 
+                            value=1, step=1, on_change=on_input_change, 
+                            key="user_input"+str(st.session_state['current_task']))
 
-
-    with st.container():
-        st.number_input("Your solution:", min_value=0, max_value=9, 
-                        value=1, step=1, on_change=on_input_change, 
-                        key="user_input"+str(st.session_state['current_task']),
-                        disabled=st.session_state['finished'])
+if st.session_state['input_done'] == False:
+    st.image(image, use_column_width=True)
+    with st.sidebar:
+        st.selectbox("How many math problems would you like to solve?", [3, 5, 7, 10], key="riddle_count", index=0)
+        st.selectbox("Which story do you want to hear?", ["The Bullerby Children", "Pippi Longstocking", "Emil of Lönneberga"], key="person", index=0)
+        st.selectbox("Choose a topic", ["Being in school", "Playing in the woods", "Going shopping in the city", "Camping in the backyard", "Riding horses"], key="topic", index=0)
+        if st.button("Start the story", key="start_btn"):
+            st.session_state['input_done'] = True
