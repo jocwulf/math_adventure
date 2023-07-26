@@ -7,10 +7,9 @@ from streamlit_chat import message
 from PIL import Image
 
 # Constants
-SENTENCES_PER_EPISODE = 5
-RIDDLE_MIN = 2
-RIDDLE_MAX = 10
-MODEL = "gpt-3.5-turbo-0613"
+SENTENCES_PER_EPISODE = 5   # number of sentences per episode
+RIDDLE_MIN = 2 # minimum number for riddles
+MODEL = "gpt-3.5-turbo-0613" # set to best performing model
 
 # Load OpenAI key from .env file
 load_dotenv(".env")
@@ -19,13 +18,24 @@ openai.api_key = os.getenv("OPENAI_KEY")
 # Load image
 image = Image.open('children.png')
 
-def generate_riddle():
-    """Generates a multiplication riddle and returns the question and answer."""
-    multiplicand = np.random.randint(RIDDLE_MIN, RIDDLE_MAX)
-    multiplier = np.random.randint(RIDDLE_MIN, RIDDLE_MAX)
-    product = multiplicand * multiplier
-    question = "{} : {}".format(str(product), str(multiplier))
-    return question, multiplicand
+def generate_riddle(calculation_type, riddle_max):
+    """Generates a riddle and returns the question and answer."""
+    num1 = np.random.randint(RIDDLE_MIN, riddle_max)
+    num2 = np.random.randint(RIDDLE_MIN, riddle_max)
+    if calculation_type == "Addition":
+        question = "{} + {}".format(num1, num2)
+        answer = num1 + num2
+    elif calculation_type == "Subtraction":
+        question = "{} - {}".format(max(num1, num2), min(num1, num2))
+        answer = max(num1, num2) - min(num1, num2)
+    elif calculation_type == "Multiplication":
+        question = "{} * {}".format(num1, num2)
+        answer = num1 * num2
+    elif calculation_type == "Division":
+        product = num1 * num2
+        question = "{} / {}".format(product, num1)
+        answer = num2
+    return question, answer
 
 def generate_story(messages):
     """Generates a story episode using the OpenAI API and returns the story."""
@@ -58,7 +68,8 @@ def generate_challenge():
         progress_bar.progress((i + 1) / st.session_state['riddle_count'])
 
         # generate riddle
-        question, answer = generate_riddle()
+        calculation_type = np.random.choice(st.session_state['calculation_type'])
+        question, answer = generate_riddle(calculation_type, st.session_state['riddle_max'])
         messages.append({"role": "user", "content": question})
 
         # generate story
@@ -100,6 +111,21 @@ if 'input_done' not in st.session_state:
     st.session_state['input_done'] = False
 
 st.title("༼ ͡ಠ ͜ʖ ͡ಠ ༽ Your Math Adventure")
+st.image(image, use_column_width=True)
+
+if st.session_state['input_done'] == False:
+    with st.sidebar:
+        st.selectbox("How many math problems would you like to solve?", [3, 5, 7, 10], key="riddle_count", index=0)
+        st.multiselect("Choose the calculation type", ["Addition", "Subtraction", "Multiplication", "Division"], key="calculation_type", default=["Addition", "Subtraction", "Multiplication", "Division"])
+        st.selectbox("Choose the number range", ["1 digit (1-9)", "2 digits (1-99)"], key="number_range", index=0)
+        st.selectbox("Which story do you want to hear?", ["The Bullerby Children", "Pippi Longstocking", "Emil of Lönneberga"], key="person", index=0)
+        st.selectbox("Choose a topic", ["Being in school", "Playing in the woods", "Going shopping in the city", "Camping in the backyard", "Riding horses"], key="topic", index=0)
+        if st.button("Start the story", key="start_btn"):
+            st.session_state['input_done'] = True
+            if st.session_state['number_range'] == "1 digit (1-9)":
+                st.session_state['riddle_max'] = 9
+            else:
+                st.session_state['riddle_max'] = 99
 
 if st.session_state['input_done']:
     if 'past' not in st.session_state:
@@ -124,12 +150,3 @@ if st.session_state['input_done']:
             st.number_input("Your solution:", min_value=0, max_value=100, 
                             value=1, step=1, on_change=on_input_change, 
                             key="user_input"+str(st.session_state['current_task']))
-
-if st.session_state['input_done'] == False:
-    st.image(image, use_column_width=True)
-    with st.sidebar:
-        st.selectbox("How many math problems would you like to solve?", [3, 5, 7, 10], key="riddle_count", index=0)
-        st.selectbox("Which story do you want to hear?", ["The Bullerby Children", "Pippi Longstocking", "Emil of Lönneberga"], key="person", index=0)
-        st.selectbox("Choose a topic", ["Being in school", "Playing in the woods", "Going shopping in the city", "Camping in the backyard", "Riding horses"], key="topic", index=0)
-        if st.button("Start the story", key="start_btn"):
-            st.session_state['input_done'] = True
