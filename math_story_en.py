@@ -9,7 +9,9 @@ from PIL import Image
 # Constants
 SENTENCES_PER_EPISODE = 5   # number of sentences per episode
 RIDDLE_MIN = 2 # minimum number for riddles
-MODEL = "gpt-3.5-turbo-0613" # set to best performing model
+MODEL = "gpt-3.5-turbo-0613" # use a better performing gpt model if possible
+STORY_CHARACTERS = ["The happy elephant Trumpy", "The lifely boy Leon", "The funny girl Emma", "The lazy dog Fred"] # list your characters here
+STORY_TOPICS = ["Being in school", "Playing in the woods", "Going shopping in the city", "Camping in the backyard", "Riding horses"] # list your topics here
 
 # Load OpenAI key from .env file
 load_dotenv(".env")
@@ -118,8 +120,8 @@ if st.session_state['input_done'] == False:
         st.selectbox("How many math problems would you like to solve?", [3, 5, 7, 10], key="riddle_count", index=0)
         st.multiselect("Choose the calculation type", ["Addition", "Subtraction", "Multiplication", "Division"], key="calculation_type", default=["Addition", "Subtraction", "Multiplication", "Division"])
         st.selectbox("Choose the number range", ["1 digit (1-9)", "2 digits (1-99)"], key="number_range", index=0)
-        st.selectbox("Which story do you want to hear?", ["The Bullerby Children", "Pippi Longstocking", "Emil of Lönneberga"], key="person", index=0)
-        st.selectbox("Choose a topic", ["Being in school", "Playing in the woods", "Going shopping in the city", "Camping in the backyard", "Riding horses"], key="topic", index=0)
+        st.selectbox("Which story do you want to hear?", STORY_CHARACTERS, key="person", index=0)
+        st.selectbox("Choose a topic", STORY_TOPICS, key="topic", index=0)
         if st.button("Start the story", key="start_btn"):
             st.session_state['input_done'] = True
             if st.session_state['number_range'] == "1 digit (1-9)":
@@ -147,6 +149,6 @@ if st.session_state['input_done']:
 
     if not st.session_state['finished']:
         with st.container():
-            st.number_input("Your solution:", min_value=0, max_value=100, 
-                            value=1, step=1, on_change=on_input_change, 
+            st.number_input("Your solution:", min_value=-1, max_value=100, 
+                            value=-1, step=1, on_change=on_input_change, 
                             key="user_input"+str(st.session_state['current_task']))
