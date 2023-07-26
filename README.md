@@ -1,14 +1,14 @@
 # Math Adventure with Streamlit and OpenAI
 
-This Python script uses Streamlit, a popular open-source app framework, and OpenAI's GPT-3 model to create an interactive math adventure for children. The application generates a series of riddles and stories that the child can solve and follow along, respectively.
+This Python script uses Streamlit, a popular open-source app framework, and OpenAI's GPT model to create an interactive math adventure for children. The application generates a series of riddles and stories that the child can solve and follow along, respectively.
 
 ![Alt text](./images/home.png?raw=true "Title")
 
 ## Features
 
-1. **Story Generation**: The script generates a continuation story about a school day of a chosen character. Each episode of the story consists of exactly eight sentences and ends with a math problem. The math problem is integrated into the narration of the episode.
+1. **Story Generation**: The script generates a continuation story a chosen character. The user can also choose the story they want to hear and the topic of the story. Each episode of the story consists of a configurable number sentences and ends with a math problem. The math problem is integrated into the narration of the episode.
 
-2. **Riddle Generation**: The script generates a series of math riddles for the child to solve. The number of riddles is determined by the user at the start of the session.
+2. **Riddle Generation**: The script generates a series of math riddles for the child to solve. The number of riddles is determined by the user at the start of the session. The user can choose the number of math problems, the calculation type (addition, subtraction, multiplication, division), and the number range (1 digit or 2 digits).
 
 3. **User Interaction**: The script allows the child to input their answers to the math problems. If the answer is correct, the next episode of the story is generated. If the answer is incorrect, the child is prompted to try again.
 
@@ -23,6 +23,7 @@ This Python script uses Streamlit, a popular open-source app framework, and Open
 - OpenAI Python
 - numpy
 - python-dotenv
+- Pillow
 
 ## Usage
 
