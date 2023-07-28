@@ -10,8 +10,8 @@ from PIL import Image
 SENTENCES_PER_EPISODE = 5   # number of sentences per episode
 RIDDLE_MIN = 2 # minimum number for riddles
 MODEL = "gpt-3.5-turbo-0613" # use a better performing gpt model if possible
-STORY_CHARACTERS = ["The happy elephant Trumpy", "The lifely boy Leon", "The funny girl Emma", "The lazy dog Fred"] # list your characters here
-STORY_TOPICS = ["Being in school", "Playing in the woods", "Going shopping in the city", "Camping in the backyard", "Riding horses"] # list your topics here
+#STORY_CHARACTERS = ["The happy elephant Trumpy", "The lifely boy Leon", "The funny girl Emma", "The lazy dog Fred"] # list your characters here
+#STORY_TOPICS = ["Being in school", "Playing in the woods", "Going shopping in the city", "Camping in the backyard", "Riding horses"] # list your topics here
 
 # Load OpenAI key from .env file
 load_dotenv(".env")
@@ -133,8 +133,8 @@ else: # story not ended
             st.selectbox("How many math problems would you like to solve?", [3, 5, 7, 10], key="riddle_count", index=0)
             st.multiselect("Choose the calculation type", ["Addition", "Subtraction", "Multiplication", "Division"], key="calculation_type", default=["Addition", "Subtraction", "Multiplication", "Division"])
             st.selectbox("Choose the number range", ["1 digit (1-9)", "2 digits (1-99)"], key="number_range", index=0)
-            st.selectbox("Which story do you want to hear?", STORY_CHARACTERS, key="person", index=0)
-            st.selectbox("Choose a topic", STORY_TOPICS, key="topic", index=0)
+            st.text_input("Provide a character for your story", key="person")
+            st.text_input("Provide a topic for your story", key="topic")
             if st.button("Start the story", key="start_btn"):
                 st.session_state['input_done'] = True
                 if st.session_state['number_range'] == "1 digit (1-9)":

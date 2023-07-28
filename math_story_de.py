@@ -10,8 +10,6 @@ from PIL import Image
 SENTENCES_PER_EPISODE = 5   # Anzahl der Sätze pro Episode
 RIDDLE_MIN = 2 # Mindestzahl für Rätsel
 MODEL = "gpt-3.5-turbo-0613" # Verwenden Sie ein besser performantes GPT-Modell, wenn möglich
-STORY_CHARACTERS = ["Der fröhliche Elefant Trumpy", "Der lebhafte Junge Leon", "Das lustige Mädchen Emma", "Der faule Hund Fred"] # Liste Ihrer Charaktere hier
-STORY_TOPICS = ["In der Schule sein", "Im Wald spielen", "In der Stadt einkaufen gehen", "Im Hinterhof campen", "Pferde reiten"] # Liste Ihrer Themen hier
 
 # Laden des OpenAI-Schlüssels aus der .env-Datei
 load_dotenv(".env")
@@ -133,8 +131,8 @@ else: # Geschichte nicht beendet
             st.selectbox("Wie viele Matheaufgaben möchtest du lösen?", [3, 5, 7, 10], key="riddle_count", index=0)
             st.multiselect("Wähle den Rechentyp", ["Addition", "Subtraktion", "Multiplikation", "Division"], key="calculation_type", default=["Addition", "Subtraktion", "Multiplikation", "Division"])
             st.selectbox("Wähle den Zahlenbereich", ["1 Stelle (1-9)", "2 Stellen (1-99)"], key="number_range", index=0)
-            st.selectbox("Welche Geschichte möchtest du hören?", STORY_CHARACTERS, key="person", index=0)
-            st.selectbox("Wähle ein Thema", STORY_TOPICS, key="topic", index=0)
+            st.text_input("Wer soll die Hauptfigur Deiner Geschichte sein?", key="person")
+            st.text_input("Was willst Du mit Deiner Hauptfigur erleben?", key="topic")
             if st.button("Die Geschichte starten", key="start_btn"):
                 st.session_state['input_done'] = True
                 if st.session_state['number_range'] == "1 Stelle (1-9)":
