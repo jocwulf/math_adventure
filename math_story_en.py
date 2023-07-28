@@ -10,8 +10,6 @@ from PIL import Image
 SENTENCES_PER_EPISODE = 5   # number of sentences per episode
 RIDDLE_MIN = 2 # minimum number for riddles
 MODEL = "gpt-3.5-turbo-0613" # use a better performing gpt model if possible
-#STORY_CHARACTERS = ["The happy elephant Trumpy", "The lifely boy Leon", "The funny girl Emma", "The lazy dog Fred"] # list your characters here
-#STORY_TOPICS = ["Being in school", "Playing in the woods", "Going shopping in the city", "Camping in the backyard", "Riding horses"] # list your topics here
 
 # Load OpenAI key from .env file
 load_dotenv(".env")
@@ -121,7 +119,7 @@ if 'input_done' not in st.session_state:
     st.session_state['input_done'] = False
 
 st.title("༼ ͡ಠ ͜ʖ ͡ಠ ༽ Your Math Adventure")
-st.image(image, use_column_width=True)
+st.image(image, use_column_width=True, caption = "3 * 2 = 7 ???")
 
 if st.session_state['end_story']: # story ended
     st.write("The story has ended.")

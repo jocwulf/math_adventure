@@ -119,7 +119,7 @@ if 'input_done' not in st.session_state:
     st.session_state['input_done'] = False
 
 st.title("༼ ͡ಠ ͜ʖ ͡ಠ ༽ Dein Mathe-Abenteuer")
-st.image(image, use_column_width=True)
+st.image(image, use_column_width=True, caption = "3 * 2 = 7 ???")
 
 if st.session_state['end_story']: # Geschichte beendet
     st.write("Die Geschichte ist zu Ende.")
